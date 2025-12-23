@@ -3,36 +3,67 @@ package com.example.cleancodebe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-@Table(name = "course")
-@Getter @Setter
+@Table(
+        name = "course",
+        indexes = {
+                @Index(name = "idx_course_department", columnList = "department"),
+                @Index(name = "idx_course_semester", columnList = "recommended_semester")
+        },
+        uniqueConstraints = {
+                // 같은 학과에서 같은 과목명은 중복 방지(필요시 dept 제거 가능)
+                @UniqueConstraint(name = "uq_course_dept_name", columnNames = {"department", "name"})
+        }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Course {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name; // 과목명
+    /**
+     * CSV: 학과
+     */
+    @Column(nullable = false, length = 100)
+    private String department;
 
-    @Column(nullable = false)
-    private Integer credit; // 학점
+    /**
+     * CSV: 교과목
+     */
+    @Column(nullable = false, length = 200)
+    private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CourseCategory category; // 전필, 전선
+    /**
+     * CSV: 학기 (1~8)
+     * - UI에서 1-1~4-2로 변환해서 보여주면 됨
+     */
+    @Column(name = "recommended_semester", nullable = false)
+    private Integer recommendedSemester;
 
-    // 예: {"programming": 0.3, "dataAnalysis": 0.6, "statistics": 0.1}
-    // MySQL이면 columnDefinition="json" 추천 (없으면 TEXT로도 OK)
-    @Column(columnDefinition = "json")
-    private String skillTagsJson;
-
-    // 난이도/가중치(선택) - 점수 계산에 쓰기 좋음
-    private Integer level; // 1~5
-
-    // 개설학기 정보가 있으면 로드맵 배치 시 유리(선택)
-    private String offeredSemester; // "1-1", "2-2" 등 or "SPRING/FALL"
+    /**
+     * CSV: 기술스택 (comma-separated -> List로 저장)
+     * 예: ["python", "sql", "pandas"]
+     *
+     * 별도 테이블: course_tech_stack (course_id, tech_stack)
+     */
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "course_tech_stack",
+            joinColumns = @JoinColumn(name = "course_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uq_course_tech",
+                    columnNames = {"course_id", "tech_stack"}
+            )
+    )
+    @Column(name = "tech_stack", nullable = false, length = 100)
+    @Builder.Default
+    private List<String> techStacks = new ArrayList<>();
 }
-
