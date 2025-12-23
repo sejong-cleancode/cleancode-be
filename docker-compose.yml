@@ -4,7 +4,6 @@ services:
     image: mysql:8.0
     ports:
       - "3307:3306"
-    container_name: sejong-life-db
     environment:
       MYSQL_ROOT_PASSWORD: "cleancode"
       MYSQL_DATABASE: "cleancode_db"
