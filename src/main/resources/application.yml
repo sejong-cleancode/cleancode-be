@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: cleancode-be
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+#sejong:
+#  portal:
+#    login-url: "https://portal.sejong.ac.kr/jsp/login/login_action.jsp"
+#    sso-url: "http://classic.sejong.ac.kr/_custom/sejong/sso/sso-return.jsp?returnUrl=https://classic.sejong.ac.kr/classic/index.do"
+#

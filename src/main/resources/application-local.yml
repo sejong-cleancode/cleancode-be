@@ -12,6 +12,14 @@ spring:
         format_sql: true
         show_sql: true
     show-sql: true
+    defer-datasource-initialization: true  # Hibernate가 테이블 생성 후 데이터 로드
+
+  sql:
+    init:
+      mode: always  # 항상 SQL 스크립트 실행
+      data-locations: classpath:db/course-data.sql,classpath:db/career-data.sql
+      encoding: UTF-8
+      continue-on-error: false  # 에러 발생 시 중단
 
 logging:
   level:
