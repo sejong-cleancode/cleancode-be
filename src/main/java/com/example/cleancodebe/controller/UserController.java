@@ -2,6 +2,7 @@ package com.example.cleancodebe.controller;
 
 import com.example.cleancodebe.dto.loginDto.MemberCommand;
 import com.example.cleancodebe.dto.loginDto.SejongMemberInfo;
+import com.example.cleancodebe.service.StudentDataService;
 import com.example.cleancodebe.service.loginService.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,8 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @Tag(name = "유저", description = "유저 관련 API")
 @RestController
@@ -42,5 +47,36 @@ public class UserController {
         command.setSejongPortalPassword(sejongPortalPassword);
 
         return ResponseEntity.ok(userProfileService.getProfile(command));
+    }
+
+    private final StudentDataService studentDataService;
+
+    @Operation(
+            summary = "엑셀 파일 업로드",
+            description = "기이수 성적 엑셀 파일(.xlsx)을 업로드하고, 과목 정보를 서버에 저장합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "업로드 성공")
+    @PostMapping(value = "/academic/upload-excel/{studentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadCourseExcel(
+            @RequestParam("file") MultipartFile file,
+            @PathVariable String studentId
+    ) {
+        try {
+            studentDataService.parseAndSaveCourses(file, studentId);
+            return ResponseEntity.ok(
+                    Map.of(
+                            "status", 200,
+                            "message", "엑셀 파일 업로드 성공"
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "status", 400,
+                            "code", "BAD_REQUEST",
+                            "message", e.getMessage()
+                    )
+            );
+        }
     }
 }

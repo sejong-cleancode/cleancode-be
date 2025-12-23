@@ -20,34 +20,5 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StudentDataController {
 
-    private final StudentDataService studentDataService;
 
-    @Operation(
-            summary = "엑셀 파일 업로드",
-            description = "기이수 성적 엑셀 파일(.xlsx)을 업로드하고, 과목 정보를 서버에 저장합니다."
-    )
-    @ApiResponse(responseCode = "200", description = "업로드 성공")
-    @PostMapping(value = "/{studentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadCourseExcel(
-            @RequestParam("file") MultipartFile file,
-            @PathVariable String studentId
-    ) {
-        try {
-            studentDataService.parseAndSaveCourses(file, studentId);
-            return ResponseEntity.ok(
-                    Map.of(
-                            "status", 200,
-                            "message", "엑셀 파일 업로드 성공"
-                    )
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(
-                    Map.of(
-                            "status", 400,
-                            "code", "BAD_REQUEST",
-                            "message", e.getMessage()
-                    )
-            );
-        }
-    }
 }
