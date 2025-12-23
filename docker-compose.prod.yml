@@ -3,12 +3,12 @@ version: "3.8"
 services:
   db:
     image: mysql:8.0
-    container_name: cleancode-db
+    container_name: cleancode-db-prod
     ports:
       - "3307:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: "cleancode"
-      MYSQL_DATABASE: "cleancode_db"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-cleancode}"
+      MYSQL_DATABASE: "${DB_NAME:-cleancode_db}"
       TZ: "Asia/Seoul"
     volumes:
       - db-data:/var/lib/mysql
@@ -18,22 +18,31 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+    restart: always
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cleancode-app
+    image: cleancode-app:${VERSION:-latest}
+    container_name: cleancode-app-prod
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILE: "local"
+      SPRING_PROFILE: "prod"
+      DB_PASSWORD: "${DB_PASSWORD:-cleancode}"
+      JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
     depends_on:
       db:
         condition: service_healthy
     networks:
       - cleancode-network
-    restart: unless-stopped
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   db-data:
