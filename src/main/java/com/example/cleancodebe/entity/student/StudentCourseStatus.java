@@ -1,4 +1,4 @@
-package com.example.cleancodebe.entity;
+package com.example.cleancodebe.entity.student;
 
 public enum StudentCourseStatus {
     COMPLETED("완료"),

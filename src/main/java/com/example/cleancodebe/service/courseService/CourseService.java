@@ -1,7 +1,7 @@
 package com.example.cleancodebe.service.courseService;
 
 import com.example.cleancodebe.dto.courseDto.CourseDetailResponse;
-import com.example.cleancodebe.entity.Course;
+import com.example.cleancodebe.entity.course.Course;
 import com.example.cleancodebe.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

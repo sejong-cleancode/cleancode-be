@@ -1,7 +1,7 @@
 package com.example.cleancodebe.repository;
 
-import com.example.cleancodebe.entity.StudentCourse;
-import com.example.cleancodebe.entity.StudentCourseStatus;
+import com.example.cleancodebe.entity.student.StudentCourse;
+import com.example.cleancodebe.entity.student.StudentCourseStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

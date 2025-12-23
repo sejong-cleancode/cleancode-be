@@ -2,6 +2,8 @@ version: "3.8"
 services:
   db:
     image: mysql:8.0
+    ports:
+      - "3307:3306"
     container_name: sejong-life-db
     environment:
       MYSQL_ROOT_PASSWORD: "cleancode"

@@ -1,4 +1,4 @@
-package com.example.cleancodebe.entity;
+package com.example.cleancodebe.entity.course;
 
 import jakarta.persistence.*;
 import lombok.*;

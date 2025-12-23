@@ -1,6 +1,6 @@
 package com.example.cleancodebe.dto;
 
-import com.example.cleancodebe.entity.StudentCourseStatus;
+import com.example.cleancodebe.entity.student.StudentCourseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

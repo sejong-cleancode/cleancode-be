@@ -1,4 +1,4 @@
-package com.example.cleancodebe.entity;
+package com.example.cleancodebe.entity.common;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

@@ -1,11 +1,12 @@
 package com.example.cleancodebe.service;
 
 import com.example.cleancodebe.dto.ParsedCourseDto;
-import com.example.cleancodebe.entity.StudentCourse;
-import com.example.cleancodebe.entity.StudentCourseStatus;
+import com.example.cleancodebe.entity.student.StudentCourse;
+import com.example.cleancodebe.entity.student.StudentCourseStatus;
 import com.example.cleancodebe.repository.StudentCourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -40,7 +41,7 @@ public class StudentDataService {
 
                 // 헤더 행 재확인 (교과목명 포함 행)
                 Cell headerCheck = row.getCell(4);
-                if (headerCheck != null && "교과목명".equals(headerCheck.getStringCellValue().trim())) {
+                if (headerCheck != null && "교과목명".equals(getCellValueAsString(headerCheck))) {
                     continue;
                 }
 
@@ -57,20 +58,26 @@ public class StudentDataService {
                 Cell gradePointCell = row.getCell(11);
 
                 // 완전 빈 행 무시
-                if (courseCell == null || courseCell.getStringCellValue().trim().isEmpty()) {
+                if (courseCell == null || getCellValueAsString(courseCell).isEmpty()) {
                     continue;
                 }
 
                 // 데이터 추출
-                String year = yearCell != null ? yearCell.getStringCellValue().trim() : "";
-                String semester = semesterCell != null ? semesterCell.getStringCellValue().trim() : "";
-                String courseName = courseCell.getStringCellValue().trim();
-                String courseType = courseTypeCell != null ? courseTypeCell.getStringCellValue().trim() : "";
-                Integer credits = creditsCell != null ? Integer.parseInt(creditsCell.getStringCellValue().trim()) : 0;
-                String grade = gradeCell != null ? gradeCell.getStringCellValue().trim() : "";
-                Double gradePoint = gradePointCell != null ? gradePointCell.getNumericCellValue() : 0.0;
+                String year = getCellValueAsString(yearCell);
+                String semester = getCellValueAsString(semesterCell);
+                String courseName = getCellValueAsString(courseCell);
+                String courseType = getCellValueAsString(courseTypeCell);
+                Integer credits = getCellValueAsInteger(creditsCell);
+                String grade = getCellValueAsString(gradeCell);
+                Double gradePoint = getCellValueAsDouble(gradePointCell);
 
-                System.out.println(">> row " + rowIndex + ": " + courseName + " / " + year + semester + " / " + credits + "학점 / " + grade + " / " + gradePoint);
+                // 전공 과목만 필터링 (전필, 전선만 저장)
+                if (!courseType.equals("전필") && !courseType.equals("전선")) {
+                    System.out.println(">> row " + rowIndex + " SKIPPED: " + courseName + " (" + courseType + ")");
+                    continue;
+                }
+
+                System.out.println(">> row " + rowIndex + ": " + courseName + " / " + courseType + " / " + year + semester + " / " + credits + "학점 / " + grade + " / " + gradePoint);
 
                 if (grade.isEmpty()) {
                     throw new RuntimeException("엑셀 파일 파싱 실패: 등급이 비어있습니다.");
@@ -113,5 +120,54 @@ public class StudentDataService {
 
     public boolean hasUploadedHistory(String studentId) {
         return studentCourseRepository.existsByStudentId(studentId);
+    }
+
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> String.valueOf((int) cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cell.getCellFormula();
+            default -> "";
+        };
+    }
+
+    private Integer getCellValueAsInteger(Cell cell) {
+        if (cell == null) {
+            return 0;
+        }
+        return switch (cell.getCellType()) {
+            case STRING -> {
+                String value = cell.getStringCellValue().trim();
+                if (value.isEmpty()) {
+                    yield 0;
+                }
+                // 소수점이 있는 경우 Double로 파싱 후 int로 변환
+                try {
+                    yield Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    yield (int) Double.parseDouble(value);
+                }
+            }
+            case NUMERIC -> (int) cell.getNumericCellValue();
+            default -> 0;
+        };
+    }
+
+    private Double getCellValueAsDouble(Cell cell) {
+        if (cell == null) {
+            return 0.0;
+        }
+        return switch (cell.getCellType()) {
+            case STRING -> {
+                String value = cell.getStringCellValue().trim();
+                yield value.isEmpty() ? 0.0 : Double.parseDouble(value);
+            }
+            case NUMERIC -> cell.getNumericCellValue();
+            default -> 0.0;
+        };
     }
 }

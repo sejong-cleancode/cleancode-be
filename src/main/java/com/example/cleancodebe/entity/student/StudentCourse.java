@@ -1,5 +1,6 @@
-package com.example.cleancodebe.entity;
+package com.example.cleancodebe.entity.student;
 
+import com.example.cleancodebe.entity.common.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
